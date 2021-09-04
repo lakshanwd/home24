@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Web Crawler</title>
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/js/bootstrap.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/toastr@2.1.4/build/toastr.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/toastr@2.1.4/build/toastr.min.js"></script>
+    <script type="text/javascript">
+      $(document).ready(() => {
+        // setup on click listener
+        $("#btn-analyze").click(() => {
+          let $title = $("#title");
+          let $h1 = $("#h1");
+          let $h2 = $("#h2");
+          let $h3 = $("#h3");
+          let $h4 = $("#h4");
+          let $h5 = $("#h5");
+          let $h6 = $("#h6");
+          let $login = $("#login");
+          let $aTags = $("#a-tags");
+          let $loader = $("#loader");
+
+          // make http call to server
+          $.ajax({
+            url: "analyze",
+            method: "post",
+            dataType: "json",
+            contentType: "application/json",
+            beforeSend: () => {
+              $loader.removeClass("d-none");
+              $aTags.children().remove();
+              $title.html("");
+              $h1.html("");
+              $h2.html("");
+              $h3.html("");
+              $h4.html("");
+              $h5.html("");
+              $h6.html("");
+              $login.html("");
+            },
+            data: JSON.stringify({
+              url: $("#url").val(),
+            }),
+            success: (data) => {
+              $title.html(data.result.title);
+              $h1.html(data.result.h1);
+              $h2.html(data.result.h2);
+              $h3.html(data.result.h3);
+              $h4.html(data.result.h4);
+              $h5.html(data.result.h5);
+              $h6.html(data.result.h6);
+              $login.html(data.result.username && data.result.password);
+              data.result.aTags.forEach((e) => {
+                $("<tr/>").append($("<td/>").html(e.url)).append($("<td/>").html(e.external)).append($("<td/>").html(e.accessible)).appendTo($aTags);
+              });
+            },
+            error: (err, sss) => {
+              toastr.error(err.responseJSON.error, "Oops, something went wrong!");
+            },
+            complete: () => {
+              $loader.addClass("d-none");
+            },
+          });
+        });
+      });
+    </script>
+  </head>
+  <body>
+    <div class="container">
+      <div class="row mt-3">
+        <div class="input-group mb-3">
+          <input
+            id="url"
+            type="url"
+            class="form-control"
+            placeholder="Url to be scanned"
+            aria-label="Url to be scanned"
+            aria-describedby="btn-analyze"
+          />
+          <button class="btn btn-outline-secondary" type="button" id="btn-analyze">
+            <span class="spinner-border spinner-border-sm d-none" id="loader" role="status" aria-hidden="true"></span>
+            Analyze
+          </button>
+        </div>
+        <hr />
+        <h2>Web Page Statistics</h2>
+        <table class="table table-striped">
+          <thead>
+            <tr>
+              <th>Property</th>
+              <th>Value</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Title of the page</td>
+              <td id="title"></td>
+            </tr>
+            <tr>
+              <td>H1 header count</td>
+              <td id="h1"></td>
+            </tr>
+            <tr>
+              <td>H2 header count</td>
+              <td id="h2"></td>
+            </tr>
+            <tr>
+              <td>H3 header count</td>
+              <td id="h3"></td>
+            </tr>
+            <tr>
+              <td>H4 header count</td>
+              <td id="h4"></td>
+            </tr>
+            <tr>
+              <td>H5 header count</td>
+              <td id="h5"></td>
+            </tr>
+            <tr>
+              <td>H6 header count</td>
+              <td id="h6"></td>
+            </tr>
+            <tr>
+              <td>Contains Login Form</td>
+              <td id="login"></td>
+            </tr>
+          </tbody>
+        </table>
+        <hr />
+        <h3>Anchor Tag Statistics</h3>
+        <table class="table table-striped">
+          <thead>
+            <tr>
+              <th>Link</th>
+              <th>External</th>
+              <th>Accessible</th>
+            </tr>
+          </thead>
+          <tbody id="a-tags"></tbody>
+        </table>
+      </div>
+    </div>
+  </body>
+</html>
