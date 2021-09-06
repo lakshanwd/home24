@@ -54,6 +54,6 @@ improve the proformance of the solutions drastically.
     $ docker build --pull -f Dockerfile -t home24:latest .
 
     # run image
-    $ docker run home24:latest
+    $ docker run -d -p 80:3000 home24:latest
     ```
-* Open browser application and navigate to http://localhost:3000
+* Open browser application and navigate to http://localhost
