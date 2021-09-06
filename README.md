@@ -17,15 +17,15 @@ $ go run main.go
 ```
 Open http://localhost:3000 on your browser
 
-### Assumptions made
+#### Assumptions made
 * treated the urls with same host as internal links, others links reated as exernal links
 
-### Further improvements
+#### Further improvements
 A major drawback of this application is, it analyzes the availability of the links by making http calls to each one
 of the links synchonusly.  If we were able to analyze several urls at once in a controlled pararell environment, it would
 improve the proformance of the solutions drastically.
 
-### Screenshots
+#### Screenshots
 ![screenshot1](/screenshots/screenshot1.png)
 ## Deployment
 
@@ -46,7 +46,7 @@ improve the proformance of the solutions drastically.
 * deploy executable as a service
 * configure a reverse-proxy such as nginx to listen on port 3000 and serve the application
 
-#### Serve on a contaner environment
+### Serve on a contaner environment
 
 * execute the following commands
     ```sh
