@@ -46,7 +46,7 @@ improve the proformance of the solutions drastically.
 * deploy executable as a service
 * configure a reverse-proxy such as nginx to listen on port 3000 and serve the application
 
-### Serve on a contaner environment
+### Serve on a docker environment
 
 * execute the following commands
     ```sh
