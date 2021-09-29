@@ -7,6 +7,7 @@ import (
 	"home-24/utils"
 	"net/url"
 	"strings"
+	"sync"
 
 	"golang.org/x/net/html"
 )
@@ -71,10 +72,33 @@ func Analyze(ctx context.Context, client utils.HttpClient, urlToBeScanned string
 		return nil, err
 	}
 
-	doc, _ := html.Parse(bytes.NewBuffer(documentBody))
-	crawl(doc, &stat)
-	for i, aTag := range stat.AnchorsTags {
-		stat.AnchorsTags[i].Accessible = client.IsAccessible(ctx, aTag.Url)
+	doc, err := html.Parse(bytes.NewBuffer(documentBody))
+	if err != nil {
+		return nil, err
 	}
+
+	crawl(doc, &stat)
+	var wg sync.WaitGroup
+	doConcurrently(ctx, client, &wg, stat.AnchorsTags)
+	wg.Wait()
 	return &stat, nil
+}
+
+func doConcurrently(ctx context.Context, client utils.HttpClient, wg *sync.WaitGroup, tags []model.AnchorTag) {
+	tagPool := make(chan *model.AnchorTag)
+	for i := 0; i < 8; i++ {
+		go doInBackground(ctx, client, wg, tagPool, i)
+	}
+	wg.Add(len(tags))
+	for i := range tags {
+		tagPool <- &tags[i]
+	}
+	close(tagPool)
+}
+
+func doInBackground(ctx context.Context, client utils.HttpClient, wg *sync.WaitGroup, tags <-chan *model.AnchorTag, workerId int) {
+	for tag := range tags {
+		tag.Accessible = client.IsAccessible(ctx, tag.Url)
+		wg.Done()
+	}
 }
